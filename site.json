@@ -1,0 +1,16 @@
+{
+    "oName": "c_dziHarvPage",
+    "o": null,
+    "dir": "viteyss-site-dziabong-harvester",
+    "asModule": true,
+    "asVite": true,
+    "asPlugin": true,
+    "jssrc":["c_dziHarv.js"],
+    "enable": true,
+    "author": "Bartłomiej Ceglik <yoyoek@wp.pl>",
+    "ver": "0.0.1",
+    "desc": "Test of viteyss-site-dziabong-harvester to get all posible sensors by browser.",
+    "otdm":{
+        "playground": false
+    }
+}

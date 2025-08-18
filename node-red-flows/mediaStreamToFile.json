@@ -1,0 +1,38 @@
+[
+    {
+        "id": "b796b3b85a6f873f",
+        "type": "function",
+        "z": "5019223acfcf272b",
+        "name": "dziHarv/mediaStream to msg",
+        "func": "if( msg.topic == 'viteyss/msg' && msg.isFrom =='on_message'){\n    msg['j'] = JSON.parse( msg.payload );\n    \n    //ffmpeg -i ./m2.webm -c:v libx264 -preset slow -crf 22 -c:a aac -b:a 128k output.mp4\n    \n    if( msg['j'].topic == 'dziHarv/mediaStream' ){\n        msg = {\n            'topic': '/tmp/filestore',\n            'filename': '/tmp/vid2.webm',\n            'payload':msg['j']['chunk'],\n            'encoding':'base64'\n        };\n        return msg\n    }\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 460,
+        "wires": [
+            [
+                "48712df98b37ac46",
+                "5870595bf612f767"
+            ]
+        ]
+    },
+    {
+        "id": "5870595bf612f767",
+        "type": "file",
+        "z": "5019223acfcf272b",
+        "name": "",
+        "filename": "",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "base64",
+        "x": 760,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    }
+]
