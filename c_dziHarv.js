@@ -1,8 +1,9 @@
 
 import { mediaGetVideo, recordStream, recordScreenAndAudio, stopRecording } from "./mediaStreamHelp";
 import { dziHarv } from "./dziHarv";
-import dziharStatus from './assets/dziharStatus.vue';
-//import { createApp } from 'vue';
+//import dziharStatus from './assets/dziharStatus.vue';
+import cameraControls from "./assets/cameraControls.vue";
+import { createApp } from 'vue';
 
 async function setFocusCam( tra, v ){
     await tra.applyConstraints( v );
@@ -19,7 +20,7 @@ class c_dziHarvPage{
     this.doIt = {};
     this.DH = new dziHarv();
     this.dziIterIntervalLooper = undefined;
-    //this.app = -1;
+    this.app = -1;
 
   }
   
@@ -105,9 +106,8 @@ ${this.mkToogleButtons()}
 
 <video id="srvvideo" autoplay muted ></video>
 <video id="vvideo" autoplay muted ></video>
-<input type="range" id="dziFocus" name="dziFocus" 
-    style="max-width:20%"
-  min="0" max="5" value="1" step="0.009999999776482582">
+
+<div id="dziharCamControl">dziharCamControl</div>
 
 
 <input type="text" id="sending-id" placeholder="Enter an ID for this measurement" autocorrect="off" autocapitalize="off"
@@ -226,6 +226,11 @@ ${this.mkToogleButtons()}
     console.log('colect status ', doIt);
     this.DH.start( doIt );
 
+    setTimeout(()=>{
+      this.app.refreshSettings()
+    },100);
+
+
   }
   mainStop = ()=>{
     this.DH.stop();
@@ -253,22 +258,9 @@ ${this.mkToogleButtons()}
 
 
     //this.app = createApp( dziharStatus ).mount('#dziharStatus');
+    this.app = createApp( cameraControls ).mount('#dziharCamControl');
 
-    $('#dziFocus').on('change',(o)=>{
-      console.log('v',$('#dziFocus').val());
-      let vidtra = document.getElementById('vvideo').srcObject.getVideoTracks();
-      let tra = vidtra[0];
-      let v = parseFloat( $('#dziFocus').val() );
-
-      let newSet = {
-        focusMode:'manual',
-        focusDistance: v
-      };
-      
-      setFocusCam( tra, newSet );
-
-    });
-
+   
   }
 
   

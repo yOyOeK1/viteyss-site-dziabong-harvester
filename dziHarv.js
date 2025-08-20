@@ -1,3 +1,4 @@
+import { ambientLightHelper } from "./ambientLightHelp";
 import { geoLocationHelper } from "./geoLocationHelp";
 import { localtimeHelper } from "./localtimeHelp";
 import { medStrHelper, mediaGetVideo } from "./mediaStreamHelp";
@@ -43,6 +44,11 @@ class dziHarv{
                 'o': new orientationHelper( this.streaming ),
                 'doIt': false,
                 'desc': 'orientation',
+            },
+            'ambLig': {
+                'o': new ambientLightHelper( this.streaming ),
+                'doIt': false,
+                'desc': 'ambient light'
             }
         };
         

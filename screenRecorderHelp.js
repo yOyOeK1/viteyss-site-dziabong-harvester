@@ -55,7 +55,9 @@ async function srrecordStream( streaming=false, sendingIdvalue=-1, resBase = {} 
   
 
   try{
-    let screenStream = await captureScreen()
+    let screenStream = await captureScreen({
+      frameRate: settingsMedSer['frameRate']
+    });
 
     let audioStream = -1;
     if( settingsMedSer['audio'] != 0 ){

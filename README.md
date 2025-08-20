@@ -1,7 +1,7 @@
 # viteyss-site-dziabong-harvester
 
 Dziabong harvester is a site for **viteyss-site-** plugin vector implementation.
-Main gool of this site is to harvest as mucho sensors / inputs / outputs on client running site as posible. Since **viteyss** can run as **SSL** / https we have access to Web Api connecting us to hardware layer by web browser.
+Main gool of this site is to harvest as mucho sensors / inputs / outputs on client running site as posible. Since **viteyss** can run as **SSL** / https we have access to **Web Api** connecting us to hardware layer by web browser.
 
 
 #### for what it is
@@ -11,16 +11,22 @@ Target is to have network transparent access to inputs / outputs on devices. Thi
 #### screenshot
 
 This is a current status of site. Me as a ui eeehh.
-![](./assets/screen_25081807.png)
+
+![](./assets/screen_2508200906.png)
+
+`version 250820`
+
+
 
 
 #### it can
 
 - [x] gps
 - [x] orientation ( heel, pitch, heading ) this is mix of accelerometers and magnetometer
+- [x] motion accelerometers readings
 - [x] screen recorder
     - [x] sound yes / no
-            - [x] quality
+        - [x] quality
 - [x] mediaStream
     - [x] video
     - [x] audio
