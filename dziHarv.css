@@ -1,0 +1,34 @@
+.dziharOri div{
+  display:inline;
+}
+
+.dziharOri #dziharOriStatus, #dziharLocStatus{
+  font-size:small;
+  border: solid 2px gray;
+  padding: 3px;
+  border-radius: 4px;
+  background-color:rgb(203, 211, 35);
+}
+
+.dziharOri img{
+  width:${this.iconSize}px; 
+  heigh:${this.iconSize}px;
+}
+     
+.dziharLocation, .dziharMedia, .dziharOri{
+    border: 1px solid gray;
+    margin: 5px;
+
+}
+
+
+#vvideo, #srvvideo {
+  flex: 100%;
+  max-width: 128px;
+  min-height: 72px;
+  height: auto;
+  display: block;
+  background-color: black;  
+  margin-bottom: 10px;
+}
+

@@ -18,22 +18,32 @@ This is a current status of site. Me as a ui eeehh.
 
 - [x] gps
 - [x] orientation ( heel, pitch, heading ) this is mix of accelerometers and magnetometer
+- [x] screen recorder
+    - [x] sound yes / no
+            - [x] quality
 - [x] mediaStream
     - [x] video
     - [x] audio
     - [ ] selector for
         - [ ] video yes / no
-            - [ ] camera front / back
+            - [x] camera front / back / by camera id
             - [ ] resolution
-            - [ ] fps
-        - [ ] sound yes / no
-            - [ ] quality
+            - [x] fps
+            - [ ] focus
+            - [ ] zoom
+        - [x] sound yes / no
+            - [x] quality
 - [ ] vibra
 - [ ] battery
 - [ ] battery temperature
 - [ ] charging status
 - [ ] ....
 
+
+#### hot stuff
+
+* chrome debug mobile device. Enter adress ...
+    `chrome://inspect/#devices`
 
 
 
@@ -43,6 +53,13 @@ This is a current status of site. Me as a ui eeehh.
     You can stream media stream like video / audio and grab it to file in node-red by using flow...
 
     ![](./node-red-flows/mediaStreamToFile.png)
+    
     get [flow to import ...](./node-red-flows/mediaStreamToFile.json)
 
 
+* screen recorder to file
+    You can stream screen rocerding like video / audio and grab it to file in node-red by using flow...
+
+    ![](./node-red-flows/screenRecorderToFile.png)
+    
+    get [flow to import ...](./node-red-flows/screenRecorderToFile.json)

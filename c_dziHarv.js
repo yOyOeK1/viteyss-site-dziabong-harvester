@@ -1,14 +1,25 @@
 
-import { mediaGetVideo,recordStream, recordScreenAndAudio,stopRecording } from "./mediaStreamHelp";
+import { mediaGetVideo, recordStream, recordScreenAndAudio, stopRecording } from "./mediaStreamHelp";
+import { dziHarv } from "./dziHarv";
+import dziharStatus from './assets/dziharStatus.vue';
+//import { createApp } from 'vue';
 
+async function setFocusCam( tra, v ){
+    await tra.applyConstraints( v );
+    return 1;
+}
 
 
 class c_dziHarvPage{
 
   constructor(){
 
-    this.iconSize = 50;
+    this.iconSize = 80;
     this.streaming = false;
+    this.doIt = {};
+    this.DH = new dziHarv();
+    this.dziIterIntervalLooper = undefined;
+    //this.app = -1;
 
   }
   
@@ -24,204 +35,60 @@ class c_dziHarvPage{
     
   }
   
-  stopStream=()=>{
-    this.streaming = false;
-    this.media_stopRecording()
-  }
-
-
-  geoLocationQuery=()=>{
-    if (!navigator.geolocation) {
-      $('#dziharLocStatus').html("Geolocation is not supported by your browser");
-    
-    } else {
-      $('#dziharLocStatus').html("Locating…");
-      navigator.geolocation.getCurrentPosition(
-        siteByKey.c_dziHarvPage.o.geoLocSuccess, 
-        siteByKey.c_dziHarvPage.o.geoLocError,
-        {
-          maximumAge: 0,
-          timeout: 5000,
-          enableHighAccuracy: true
-        });
-    
-    }
-
-  }
-
-  geoLocSuccess = ( position )=>{
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
-
-    $('#locLat').html( latitude );
-    $('#locLon').html( longitude );
-    $('#locAccuracy').html( Math.round(position.coords.accuracy)+" met." );
-
-    if(window['wsbroadcast'] ){
-      sOutSend(JSON.stringify({
-        'topic':'dziHarv/geolocation',
-        'lat': latitude,
-        'lon': longitude,
-        'accu': position.coords.accuracy,
-        'positionObj': position.coords
-      }));
-
-      if( siteByKey.c_dziHarvPage.o.streaming == true )
-        this.geoLocationQuery();
-    }
-
-  } 
   
-  geoLocError = () => {
-    $('#dziharLocStatus').html("Unable to retrive location");
+
+
+
+  mkColectStatus = () =>{
+    let ks = this.DH.getKeysWithDesc();
+    let tr = {};
+    for( let k of Object.keys(ks) ){
+      tr[ k ] = $(`#dodzihar${k}`).is(':checked') ? true : false;
+    }
+
+    if( $('#sending-id').val() != '' ){
+      document.cookie = 'dziharsender='+$('#sending-id').val();
+    }
+    tr['sender'] = $('#sending-id').val()==''? Date.now() : $('#sending-id').val();
+
+    return tr;
   }
 
-  mkForm1=()=>{
-    //document.addEventListener('DOMContentLoaded', function(){
-      //var socket = io.connect('http://<<IP>>');
-      console.log('streaming - adding event listiner');
-      var streaming = siteByKey.c_dziHarvPage.o.streaming;
-      var status = document.getElementById('status');
-      var sendingId = document.getElementById('sending-id');      
-      var form = document.getElementById('enter');
+  mkToogleButtons = () =>{
+    let ks = this.DH.getKeysWithDesc();
+    let tr = `
+    <li class="ui-field-contain" id="dowhatdzihar">
+
+        <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+          <h3>Select streams:</h3>
+          
+          `;
+    for( let k of Object.keys(ks) ){
+      let s = ks[k];
+      let extra = '';
+      if( s.o.options ) extra = '</fieldset></li>'+s.o.options()+'<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">';
       
-      var startStreaming = function (e) {
-        e.preventDefault();
-
-        $('#dziharOriStatus').html('no orientation sensor');
-        
-        //debugger;
-        siteByKey.c_dziHarvPage.o.streaming = true;
-        siteByKey.c_dziHarvPage.o.geoLocationQuery();
-        siteByKey.c_dziHarvPage.o.media_recordStream();
-        //form.style.display='none';
-        //status.className='csspinner line back-and-forth no-overlay';
-        //status.style.display='block';
-        document.activeElement.blur();
-        window['wsbroadcast'] = $('#wsbroadcast').is(':checked') ? true : false;
+      tr+= `
+        <input type="checkbox" name="dodzihar${k}" id="dodzihar${k}" value="1">
+        <label for="dodzihar${k}">${s.desc}</label>
+        ${extra}
+      `;
+      
+    }      
     
-        return false;
-      };
-      form.addEventListener("submit",startStreaming);
-
-
-
-      if (window.DeviceMotionEvent !== undefined) {
-        console.log('streaming - some  devices');
-
-
-        window.ondevicemotion = function(e) {
-          if (!siteByKey.c_dziHarvPage.o.streaming){
-            //console.log('streaming - no motion');  
-            return false;
-          } 
-          
-          console.log('streaming - motion');
-          ///*socket.emit('motion',
-          if(window['wsbroadcast'] ){
-            sOutSend(JSON.stringify({
-              'topic':'dziHarv/motion',
-              'sender':sendingId.value,
-              'acceleration':e.accelerationIncludingGravity,
-              'interval':e.interval,
-              'rotationRate':e.rotationRate
-            }));
-          } 
-
-        };
-        window.ondeviceorientation = function(e) {
-          if (!siteByKey.c_dziHarvPage.o.streaming) {
-            //console.log('streaming - no orientation');
-            return false;
-          }
-          $('#dziharOriStatus').html('orientation sensor - ok');
-          
-          console.log('streaming - orientation');
-          ///*socket.emit('orientation', {
-          if( window['wsbroadcast'] ){
-            sOutSend(JSON.stringify({
-              'topic':'dziHarv/orientation',
-              'sender':sendingId.value,
-              'alpha': e.alpha,
-              'beta': e.beta,
-              'gamma': e.gamma
-            }));
-
-          }
-
-          $('#oriX').html( Math.round( e.alpha ) );
-          $('#oriY').html( Math.round( e.beta ) );
-          $('#oriZ').html( Math.round( e.gamma ) );
-          
-          let ico = parseInt( siteByKey.c_dziHarvPage.o.iconSize*0.5 );
-          let to = `${ico}px ${ico}px`;
-          aajs.animate('#oriCompass',{rotate:Math.round( e.alpha ),'transform-origin':to});
-          aajs.animate('#oriHeel',{rotate:Math.round( e.gamma ),'transform-origin':to});
-          aajs.animate('#oriPitch',{rotate:Math.round( e.beta ),'transform-origin':to});
-
-
-        };
-      } else {
-        console.log('streaming - no devices');
-        status.style.display = 'block';
-        status.innerHTML = 'Unfortunately, this device does not have the right sensors.';
-      }
-    //});
-  }
-
-
-  /// --------- media stream
-
-  media_recordStream(){
-    recordStream( siteByKey.c_dziHarvPage.o.streaming );
+    tr+=`</fieldset></li>`;
+    
+    return tr;
 
   }
-  media_recordScreenAndAudio=()=>{
-    recordScreenAndAudio();
-
-  }
-  media_stopRecording(){
-    stopRecording()
-  }
-
-
-  /// ------- media stream end 
-
-
-
 
 
   getHtml = () => {
-
+    let sendingId = getCookie('dziharsender');
 
     return `
-    <style>
-.dziharOri div{
-  display:inline;
-}
-
-.dziharOri #dziharOriStatus{
-  font-size:small;
-}
-
-.dziharOri img{
-  width:${this.iconSize}px; 
-  heigh:${this.iconSize}px;
-}
-        
-
-#vvideo {
-  flex: 100%;
-  max-width: 128px;
-  min-height: 72px;
-  height: auto;
-  display: block;
-  background-color: black;  
-  margin-bottom: 10px;
-}
-
-
-    </style>
+    <link rel="stylesheet" href="${this.homeUrl}dziHarv.css">
+    <!--
     <b>${this.getName}</b><br>
     This is a npm package<br>
     viteyss-site-dziabong-harvester<br>
@@ -233,24 +100,31 @@ class c_dziHarvPage{
 
     More ditails in \`./site.json\`
     </pre>
+-->
+${this.mkToogleButtons()}
+
+<video id="srvvideo" autoplay muted ></video>
+<video id="vvideo" autoplay muted ></video>
+<input type="range" id="dziFocus" name="dziFocus" 
+    style="max-width:20%"
+  min="0" max="5" value="1" step="0.009999999776482582">
 
 
-    <b>form1 - Phone Motion Streamer</b>
-    <form id="enter">
+<input type="text" id="sending-id" placeholder="Enter an ID for this measurement" autocorrect="off" autocapitalize="off"
+        value="${sendingId}">
+<input type="button" id="btdziharDHStart" value="DH Start Streaming">
+<input type="button" id="btdziharDHStop" value="DH Stop Streaming">
 
-      <label>
-        <input type="checkbox" name="wsbroadcast" id="wsbroadcast" value="1">stream to webSocket
-      </label>
 
-      <input type="text" id="sending-id" placeholder="Enter an ID for this measurement" autocorrect="off" autocapitalize="off">
-      <input type="submit" value="Start Streaming">
-    </form>
-    <input type="button" value="stop streaming" onclick="siteByKey.c_dziHarvPage.o.stopStream();">
+<div id="dziharDeb"></div>
+    <br>
+    <hr>
+    <br>
+
     <div id="status"></div>
     
     <div class="dziharOri">
-      orientation:
-      <div id="dziharOriStatus">status</div><br>
+      <b>Orientation:</b> <span id="dziharOriStatus">status</span><br>
 
       <div id="oriX">1</div>
       <div id="oriY">2</div>
@@ -272,24 +146,89 @@ class c_dziHarvPage{
 
 
     <div class="dziharLocation">
-      location:
-      <div id="dziharLocStatus">status</div><br>
+      <b>Location:</b> <span id="dziharLocStatus">status</span><br>
 
-      lat: <div id="locLat">1</div>
-      lon: <div id="locLon">2</div>
-      accuracy: <div id="locAccuracy">3</div>
+      <table style="min-width:100%">
+        <tr>
+          <th>lat</th><th>lon</th>
+        </tr>
+        <tr>
+          <td id="locLat">. . .</td>
+          <td id="locLon">. . .</td>
+        </tr>
+      </table>
+      
+      <b>accuracy: </b><span id="locAccuracy">3</span>
     </div>
 
 
     <div class="dziharMedia">
-      <video id="vvideo" autoplay muted></video>
-      <input type="button" onclick="siteByKey.c_dziHarvPage.o.media_recordStream();" value="Record camera">
-      <input type="button" onclick="siteByKey.c_dziHarvPage.o.media_recordScreenAndAudio();" value="Record Screen and audio">
-      <input type="button" onclick="siteByKey.c_dziHarvPage.o.media_stopRecording();" value="Stop!">
-
+      <b>mediaStream:</b>
+      
+     
     </div>
     <br><br><br><br>
     `;
+
+  }
+
+
+  dziharIter = () =>{
+    let dziO = $('#dziharDeb');
+    let tr = '';
+
+    if( this.dziIter == undefined ) this.dziIter = 0;
+
+
+    if( this.DH.streaming ){
+      $('#btdziharDHStart').parent().hide();
+      $('#btdziharDHStop').parent().show();
+      tr = `<pre>${JSON.stringify(this.DH.getStatus(),null,2)}</pre>`;
+
+    }else{
+      $('#btdziharDHStart').parent().show();
+      $('#btdziharDHStop').parent().hide();
+
+
+    }
+
+
+    dziO.html(`<pre>iter: ${this.dziIter++}</pre>`+tr);
+    
+  }
+
+
+  mainStart = ( doItExt = undefined )=>{
+    let doIt = undefined;
+    if( doItExt != undefined ){
+      doIt = doItExt;
+      for( let k of Object.keys( doIt ) ){
+        console.log('set'+k+" to "+doIt[k]);
+        $(`#dodzihar${k}`).attr('checked', doIt[k] ).checkboxradio('refresh');;
+      }
+    } else
+      doIt = this.mkColectStatus();
+
+
+    let srSet = {
+      'frameRate': parseInt( $('#scrRecframeRate').val() ),
+      'audio': parseInt( $('#scrRecaudio').val() )
+    };
+    doIt['scrRecSet'] = srSet;
+
+    let mrSet = {
+      'facingMode': $('#medstrCamfacingMode').val(),
+      'frameRate': parseInt( $('#medstrCamframeRate').val() ),
+      'audio': parseInt( $('#medstrCamaudio').val() )
+    };
+    doIt['medStrSet'] = mrSet;
+
+    console.log('colect status ', doIt);
+    this.DH.start( doIt );
+
+  }
+  mainStop = ()=>{
+    this.DH.stop();
 
   }
 
@@ -297,11 +236,47 @@ class c_dziHarvPage{
     cl(`${this.getName} - getHtmlAfterLoad()`);
 
     console.log('streaming - init ');
-    this.mkForm1();
+    //this.mkForm1();
     console.log('streaming - DONE');
 
-    mediaGetVideo();
+    //mediaGetVideo();
+    $('#btdziharStoStr').parent().hide();
 
+    $('.dziharOri').hide();
+    $('.dziharLocation').hide();
+    $('.dziharMedia').hide();
+
+    this.dziIterIntervalLooper = setInterval(()=>{this.dziharIter();},1000);
+
+    $('#btdziharDHStart').on('click',(e)=>{ this.mainStart(); });
+    $('#btdziharDHStop').on('click',(e)=>{ this.mainStop(); });
+
+
+    //this.app = createApp( dziharStatus ).mount('#dziharStatus');
+
+    $('#dziFocus').on('change',(o)=>{
+      console.log('v',$('#dziFocus').val());
+      let vidtra = document.getElementById('vvideo').srcObject.getVideoTracks();
+      let tra = vidtra[0];
+      let v = parseFloat( $('#dziFocus').val() );
+
+      let newSet = {
+        focusMode:'manual',
+        focusDistance: v
+      };
+      
+      setFocusCam( tra, newSet );
+
+    });
+
+  }
+
+  
+
+  onPageLeft = () =>{
+    //this.app.unmount();
+   
+    
   }
 
   get svgDyno(){
@@ -315,6 +290,20 @@ class c_dziHarvPage{
 
   onMessageCallBack = ( r ) => {
     cl( `[cb] ${this.getName} - got msg `);
+
+
+    if( r.topic == 'dzihar/streamSwith' ){
+      if( r.payload == 'on' ){
+        this.mainStart( r.doIt );
+        //this.app.update();
+
+      } else {
+        this.mainStop();
+       // this.app.update();
+      }
+
+    }
+
 
   }
 

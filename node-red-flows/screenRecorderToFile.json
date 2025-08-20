@@ -1,0 +1,56 @@
+[
+    {
+        "id": "7b8f113e7b3c354f",
+        "type": "group",
+        "z": "5019223acfcf272b",
+        "name": "dzihar - save screen recording to file",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "4214a0bc25bad685",
+            "1d9628b823e4528f"
+        ],
+        "x": 494,
+        "y": 659,
+        "w": 472,
+        "h": 82
+    },
+    {
+        "id": "4214a0bc25bad685",
+        "type": "function",
+        "z": "5019223acfcf272b",
+        "g": "7b8f113e7b3c354f",
+        "name": "dziHarv/mediaStream to msg",
+        "func": "if( msg.topic == 'viteyss/msg' && msg.isFrom =='on_message'){\n    msg['j'] = JSON.parse( msg.payload );\n    \n    //ffmpeg -i ./m2.webm -c:v libx264 -preset slow -crf 22 -c:a aac -b:a 128k output.mp4\n    \n    if( msg['j'].topic == 'dziHarv/screen' &&\n        msg['j']['sender'] != ''\n    ){\n        msg = {\n            'topic': '/tmp/filestore',\n            'filename': '/tmp/vidscreen_'+msg['j']['sender']+'_2.webm',\n            'payload':msg['j']['chunk'],\n            'encoding':'base64'\n        };\n        return msg\n    }\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 700,
+        "wires": [
+            [
+                "1d9628b823e4528f"
+            ]
+        ]
+    },
+    {
+        "id": "1d9628b823e4528f",
+        "type": "file",
+        "z": "5019223acfcf272b",
+        "g": "7b8f113e7b3c354f",
+        "name": "",
+        "filename": "",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "base64",
+        "x": 880,
+        "y": 700,
+        "wires": [
+            []
+        ]
+    }
+]
