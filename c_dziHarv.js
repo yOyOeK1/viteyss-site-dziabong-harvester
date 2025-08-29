@@ -50,7 +50,12 @@ class c_dziHarvPage{
     if( $('#sending-id').val() != '' ){
       document.cookie = 'dziharsender='+$('#sending-id').val();
     }
+    if( $('#sendingTo').val() != '' ){
+      document.cookie = 'dziharsendingTo='+$('#sendingTo').val();
+    }
     tr['sender'] = $('#sending-id').val()==''? Date.now() : $('#sending-id').val();
+    tr['sendingTo'] = $('#sendingTo').val() == '' ? '' : $('#sendingTo').val();
+
 
     return tr;
   }
@@ -86,6 +91,7 @@ class c_dziHarvPage{
 
   getHtml = () => {
     let sendingId = getCookie('dziharsender');
+    let sendingTo = getCookie('dziharsendingTo');
 
     return `
     <link rel="stylesheet" href="${this.homeUrl}dziHarv.css">
@@ -112,8 +118,11 @@ ${this.mkToogleButtons()}
 
 <input type="text" id="sending-id" placeholder="Enter an ID for this measurement" autocorrect="off" autocapitalize="off"
         value="${sendingId}">
+<input type="text" id="sendingTo" placeholder="wsCID recever" autocorrect="off" autocapitalize="off"
+        value="${sendingTo}">
 <input type="button" id="btdziharDHStart" value="DH Start Streaming">
-<input type="button" id="btdziharDHStop" value="DH Stop Streaming">
+<input type="button" id="btdziharDHStop" value="DH Stop Streaming"><br>
+<input type="button" id="btwanSetPOI" value="setPOI">
 
 
 <div id="dziharDeb"></div>
@@ -226,6 +235,9 @@ ${this.mkToogleButtons()}
     console.log('colect status ', doIt);
     this.DH.start( doIt );
 
+    sOutSend(`wsClientIdent:`+this.DH.sender );
+
+
     setTimeout(()=>{
       this.app.refreshSettings()
     },100);
@@ -260,7 +272,16 @@ ${this.mkToogleButtons()}
     //this.app = createApp( dziharStatus ).mount('#dziharStatus');
     this.app = createApp( cameraControls ).mount('#dziharCamControl');
 
-   
+    sOutSend(`wsClientIdent:`+$('#sending-id').val());
+
+
+    $('#btwanSetPOI').click((e)=>{
+      console.log('click');
+      sOutSend(`wsSendToWSID:ocvCam:{"topic":"bt/SetPOI","sender":"noOne", "payload":"click"}`);
+      sOutSend(`wsSendToWSID:b3d:{"topic":"bt/SetPOI","sender":"noOne", "payload":"click"}`);
+    });
+
+
   }
 
   
@@ -281,7 +302,7 @@ ${this.mkToogleButtons()}
   }
 
   onMessageCallBack = ( r ) => {
-    cl( `[cb] ${this.getName} - got msg `);
+    cl( `[cb] ${this.getName} - got msg \n\n`+JSON.stringify(r,null,4));
 
 
     if( r.topic == 'dzihar/streamSwith' ){

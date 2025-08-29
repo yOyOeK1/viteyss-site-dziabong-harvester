@@ -42,7 +42,7 @@ async function captureScreen(mediaConstraints = {
 
 let recorder = null
 
-async function recordStream( streaming=false, sendingIdvalue=-1, resForWsBase = {} ) {
+async function recordStream( streaming=false, sendingIdvalue=-1, resForWsBase = {}, sendWithF=0 ) {
   let stream = undefined;
   try{
     
@@ -140,8 +140,11 @@ async function recordStream( streaming=false, sendingIdvalue=-1, resForWsBase = 
             let reader = new FileReader();
             reader.readAsDataURL(blob);
             reader.onload = function(){
+              let vidPlaQua = video.getVideoPlaybackQuality();
               resForWsBase['chunk'] = reader.result.substring(37);
-                sOutSend(JSON.stringify( resForWsBase ));
+              resForWsBase['totalFrames'] = vidPlaQua.totalVideoFrames;
+              resForWsBase['droppedFrames'] = vidPlaQua.droppedVideoFrames;                //sOutSend(JSON.stringify( resForWsBase ));
+                sendWithF( resForWsBase );
                 
             };
         }
@@ -248,8 +251,9 @@ async function getCamerasIds(){
 
 
 class medStrHelper{
-  constructor( streaming ){
+  constructor( streaming, dziHarvO ){
     this.streaming = streaming;
+    this.dziHarvO = dziHarvO;
     this.status = undefined;
     this.statusErr = '';
     this.sender = ''
@@ -259,6 +263,7 @@ class medStrHelper{
         'topic':'dziHarv/mediaStream',
         'sender': this.sender,
         'chunk': '',
+        'totalFrames':0,
         'tUpdate':0
     }; 
   }
@@ -287,7 +292,7 @@ class medStrHelper{
 
 <div class="ui-field-contain">
     <label for="medstrCamframeRate">Frame rate:</label>
-    <input type="text" name="medstrCamframeRate" id="medstrCamframeRate" value="30">     
+    <input type="text" name="medstrCamframeRate" id="medstrCamframeRate" value="12">     
 </div>
 
 <div class="ui-field-contain">
@@ -311,7 +316,7 @@ class medStrHelper{
     this.res['sender'] = this.sender;
     let res = recordStream(
       this.streaming,
-      sender, this.res
+      sender, this.res, this.dziHarvO.sendDataToWs
     );
     res.then((res)=>{
       if( res == 10 ){

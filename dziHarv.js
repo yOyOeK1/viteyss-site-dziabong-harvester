@@ -13,6 +13,7 @@ class dziHarv{
 
         this.streaming = false;
         this.sender = 'not set';
+        this.sendingTo = '';
 
         this.SS = {
             'geoLoc': {
@@ -26,12 +27,12 @@ class dziHarv{
                 'desc': 'screen',
             },
             'medStr': {
-                'o': new medStrHelper( this.streaming ),
+                'o': new medStrHelper( this.streaming, this ),
                 'doIt': false,
                 'desc': 'mediaStream',
             },
             'locTim': {
-                'o': new localtimeHelper( this.streaming ),
+                'o': new localtimeHelper( this.streaming, this ),
                 'doIt': false,
                 'desc': 'local time',
             },
@@ -86,13 +87,25 @@ class dziHarv{
     }
 
 
+    
+    sendDataToWs = ( data ) =>{
+        if( this.sendingTo == '' ){
+            sOutSend(JSON.stringify( data ));
+        }else{
+            sOutSend(`wsSendToWSID:${this.sendingTo}:`+JSON.stringify( data ));
+        }
+    }
+
     start=( doIt=undefined )=>{
 
         if( doIt != undefined ){
+            this.sendingTo = '';
             this.doIt = doIt;
             for( let k of Object.keys( doIt ) ){
                 if( k == 'sender' ){
                     this.sender = doIt[k];
+                }else if( k == 'sendingTo' ){
+                    this.sendingTo = doIt[k];
                 }else if( k == 'medStrSet') {
                     this.SS['medStr'].o.settings = doIt[ k ];
                  }else if( k == 'scrRecSet') {

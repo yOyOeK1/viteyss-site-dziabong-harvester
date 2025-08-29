@@ -2,8 +2,9 @@
 class localtimeHelper{
 
 
-    constructor( streaming ){
+    constructor( streaming, dziHarvO ){
         this.streaming = streaming;
+        this.dziHarvO = dziHarvO;
         this.status = undefined;
         this.statusErr = '';
         this.sender = '';
@@ -37,7 +38,8 @@ class localtimeHelper{
             let tn = Date.now();
             this.res['time'] = tn;
             this.res['tUpdate'] = tn;
-            sOutSend(JSON.stringify( this.res ));
+            //sOutSend(JSON.stringify( this.res ));
+            this.dziHarvO.sendDataToWs( this.res );
             
         }
 
