@@ -15,6 +15,7 @@ class localtimeHelper{
             'tUpdate':0
         };
         this.interval = undefined;
+        this.status = true;
     }
 
     start=( sender )=>{

@@ -1,10 +1,12 @@
 import { ambientLightHelper } from "./ambientLightHelp";
+import { batteryHelper } from "./batteryHelp";
 import { geoLocationHelper } from "./geoLocationHelp";
 import { localtimeHelper } from "./localtimeHelp";
 import { medStrHelper, mediaGetVideo } from "./mediaStreamHelp";
 import { motionHelper } from "./motionHelp";
 import { orientationHelper } from "./orientationHelp";
 import { screenRecorderHelper, srmediaGetVideo } from "./screenRecorderHelp";
+import { weakLockHelper } from "./weakLockHelp";
 
 class dziHarv{
 
@@ -20,6 +22,16 @@ class dziHarv{
                 'o': new geoLocationHelper( this.streaming ),
                 'doIt': false,
                 'desc': 'location',
+            },
+            'weakLock': {
+                'o': new weakLockHelper( this.streaming ),
+                'doIt': false,
+                'desc': 'weakLock',
+            },
+            'batMan': {
+                'o': new batteryHelper( this.streaming, this ),
+                'doIt': false,
+                'desc': 'battery',
             },
             'scrRec': {
                 'o': new screenRecorderHelper( this.streaming ),
@@ -116,6 +128,7 @@ class dziHarv{
                 }
             }
         } 
+        
         this.streaming = true;
         mediaGetVideo();
         srmediaGetVideo();

@@ -21,6 +21,7 @@ class c_dziHarvPage{
     this.DH = new dziHarv();
     this.dziIterIntervalLooper = undefined;
     this.app = -1;
+    this.extraParamsIds = {};
 
   }
   
@@ -72,7 +73,13 @@ class c_dziHarvPage{
     for( let k of Object.keys(ks) ){
       let s = ks[k];
       let extra = '';
-      if( s.o.options ) extra = '</fieldset></li>'+s.o.options()+'<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">';
+      if( s.o.options ) {
+        extra = `</fieldset></li><div id="dziharExtra${k}">`+s.o.options()+'</div><fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">';
+        this.extraParamsIds[ `dziharExtra${k}` ] = {
+          "key":k,
+          "isFor": `dodzihar${k}`
+        };
+      }
       
       tr+= `
         <input type="checkbox" name="dodzihar${k}" id="dodzihar${k}" value="1">
@@ -280,6 +287,20 @@ ${this.mkToogleButtons()}
       sOutSend(`wsSendToWSID:ocvCam:{"topic":"bt/SetPOI","sender":"noOne", "payload":"click"}`);
       sOutSend(`wsSendToWSID:b3d:{"topic":"bt/SetPOI","sender":"noOne", "payload":"click"}`);
     });
+
+    for( let k of Object.keys( this.extraParamsIds) ){
+      $(`#${k}`).hide();
+      $(`#${this.extraParamsIds[ k ].isFor }`).click((e)=>{
+        let state = $(`#${this.extraParamsIds[ k ].isFor }`).is(':checked') ? true : false;
+        console.log('toggled?'+k+"  val:"+state);
+
+        if( state == false )
+          $(`#${k}`).hide();
+        else
+          $(`#${k}`).show();
+
+      });
+    }
 
 
   }

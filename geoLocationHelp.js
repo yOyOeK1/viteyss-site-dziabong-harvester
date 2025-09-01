@@ -18,16 +18,6 @@ class geoLocationHelper{
         };
     }
 
-    start=( sender )=>{
-        this.sender = sender;
-        this.res['sender'] = this.sender;
-        this.geoLocationQuery( );
-    }
-
-    stop=()=>{
-
-    }
-
     chkStatus=()=>{
         if (!navigator.geolocation) {
             this.status = true;
@@ -38,6 +28,15 @@ class geoLocationHelper{
 
     }
 
+    start=( sender )=>{
+        this.sender = sender;
+        this.res['sender'] = this.sender;
+        this.geoLocationQuery( );
+    }
+
+    stop=()=>{
+
+    }
 
     geoLocSuccess = ( position )=>{
         if( this.streaming ){
