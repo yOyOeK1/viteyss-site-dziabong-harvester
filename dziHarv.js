@@ -8,6 +8,9 @@ import { orientationHelper } from "./orientationHelp";
 import { screenRecorderHelper, srmediaGetVideo } from "./screenRecorderHelp";
 import { weakLockHelper } from "./weakLockHelp";
 
+
+//https://github.com/GoogleChrome/samples/tree/gh-pages
+
 class dziHarv{
 
 
