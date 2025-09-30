@@ -8,5 +8,18 @@
   },
   "author": "",
   "license": "MIT",
-  "description": ""
+  "description": "To harvest all hardware possible from device to share it is your project.",
+  "keykords":[
+    "viteyss-site-",
+    "yss","wsqq"
+  ],
+  "wsqq":{
+    "background": true,
+    "subscribe":[
+      "gps", "weaklock", "battery", "screen",
+      "mediaStream","local time", "motion",
+      "orientation","ambient light",
+      "dziHar"
+    ]
+  }
 }
